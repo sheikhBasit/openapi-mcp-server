@@ -31,7 +31,7 @@ def register_tools(spec_source: str) -> int:
     global _base_url, _endpoints
 
     spec = load_spec(spec_source)
-    _base_url, endpoints = parse_spec(spec)
+    _base_url, endpoints = parse_spec(spec, spec_source)
 
     for endpoint in endpoints:
         _endpoints[endpoint.operation_id] = endpoint
@@ -50,15 +50,30 @@ def register_tools(spec_source: str) -> int:
         description = _build_tool_description(endpoint)
         op_id = endpoint.operation_id
 
-        # Dynamically register tool — closure captures op_id
-        def make_handler(oid: str):
-            async def handler(**kwargs: Any) -> dict:
-                return await call_endpoint(_base_url, _endpoints[oid], kwargs)
+        # Each tool accepts a single `arguments` JSON string to avoid **kwargs limitation
+        param_hints = ""
+        if endpoint.params:
+            hints = []
+            for p in endpoint.params:
+                req = " (required)" if p.required else ""
+                hints.append(f"{p.name} [{p.location}]{req}: {p.description or p.type}")
+            param_hints = "\nParameters:\n" + "\n".join(f"  - {h}" for h in hints)
+
+        full_description = description + param_hints
+
+        def make_handler(oid: str, desc: str):
+            async def handler(arguments: str = "{}") -> dict:
+                import json as _json
+                try:
+                    args = _json.loads(arguments)
+                except Exception:
+                    return {"error": f"Invalid JSON in arguments: {arguments}"}
+                return await call_endpoint(_base_url, _endpoints[oid], args)
             handler.__name__ = oid
-            handler.__doc__ = description
+            handler.__doc__ = desc
             return handler
 
-        mcp.tool(name=op_id, description=description)(make_handler(op_id))
+        mcp.tool(name=op_id, description=full_description)(make_handler(op_id, full_description))
 
     return len(endpoints)
 

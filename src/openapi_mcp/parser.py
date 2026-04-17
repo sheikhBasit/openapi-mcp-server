@@ -28,11 +28,15 @@ def _safe_id(operation_id: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_]", "_", operation_id)[:64]
 
 
-def parse_spec(spec: dict[str, Any]) -> tuple[str, list[Endpoint]]:
+def parse_spec(spec: dict[str, Any], spec_source: str = "") -> tuple[str, list[Endpoint]]:
     """Extract base URL and all endpoints from an OpenAPI 3.x spec."""
-    # Base URL
+    # Base URL — resolve relative paths against spec source origin
     servers = spec.get("servers", [])
     base_url = servers[0].get("url", "") if servers else ""
+    if base_url.startswith("/") and spec_source.startswith("http"):
+        from urllib.parse import urlparse
+        parsed = urlparse(spec_source)
+        base_url = f"{parsed.scheme}://{parsed.netloc}{base_url}"
 
     endpoints = []
     paths = spec.get("paths", {})
