@@ -1,0 +1,228 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-04-20T00:00:00.000Z",
+  "projectRoot": "/home/basitdev/workspace/openapi-mcp-server",
+  "nodes": [
+    {
+      "id": "file:src/openapi_mcp/server.py",
+      "type": "file",
+      "name": "server.py",
+      "filePath": "src/openapi_mcp/server.py",
+      "layer": "api",
+      "summary": "FastMCP server that dynamically loads an OpenAPI spec (from OPENAPI_SPEC_URL or OPENAPI_SPEC_FILE env var) and registers every API endpoint as a distinct MCP tool at startup. Uses a closure pattern to bind each handler to its operation ID.",
+      "language": "python",
+      "concepts": ["closures", "async-await"]
+    },
+    {
+      "id": "file:src/openapi_mcp/loader.py",
+      "type": "file",
+      "name": "loader.py",
+      "filePath": "src/openapi_mcp/loader.py",
+      "layer": "data",
+      "summary": "Loads an OpenAPI spec from either a remote URL (via httpx) or a local file path. Supports both JSON and YAML formats with auto-detection by content-type or file extension.",
+      "language": "python"
+    },
+    {
+      "id": "file:src/openapi_mcp/parser.py",
+      "type": "file",
+      "name": "parser.py",
+      "filePath": "src/openapi_mcp/parser.py",
+      "layer": "service",
+      "summary": "Parses an OpenAPI 3.x spec dict into a list of Endpoint dataclasses. Extracts base URL from the servers block, iterates all path/method combinations, and resolves path, query, header, and request body parameters.",
+      "language": "python",
+      "concepts": ["interfaces"]
+    },
+    {
+      "id": "file:src/openapi_mcp/executor.py",
+      "type": "file",
+      "name": "executor.py",
+      "filePath": "src/openapi_mcp/executor.py",
+      "layer": "service",
+      "summary": "Executes an HTTP request for a given Endpoint with provided arguments. Resolves path parameters, query params, headers, and JSON body from argument dict. Reads auth config from AUTH_HEADER_NAME/VALUE or API_BEARER_TOKEN env vars.",
+      "language": "python",
+      "concepts": ["async-await"]
+    },
+    {
+      "id": "file:src/openapi_mcp/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/openapi_mcp/__init__.py",
+      "layer": "utility",
+      "summary": "Package initializer for openapi_mcp module.",
+      "language": "python"
+    },
+    {
+      "id": "file:tests/test_executor.py",
+      "type": "file",
+      "name": "test_executor.py",
+      "filePath": "tests/test_executor.py",
+      "layer": "utility",
+      "summary": "Tests for the call_endpoint executor function, verifying path substitution, query params, and auth header injection.",
+      "language": "python"
+    },
+    {
+      "id": "file:tests/test_loader.py",
+      "type": "file",
+      "name": "test_loader.py",
+      "filePath": "tests/test_loader.py",
+      "layer": "utility",
+      "summary": "Tests for load_spec, covering local JSON/YAML files and HTTP URL fetching with mocked httpx.",
+      "language": "python"
+    },
+    {
+      "id": "file:tests/test_parser.py",
+      "type": "file",
+      "name": "test_parser.py",
+      "filePath": "tests/test_parser.py",
+      "layer": "utility",
+      "summary": "Tests for parse_spec, verifying that endpoints, parameters, and base URLs are extracted correctly from sample specs.",
+      "language": "python"
+    },
+    {
+      "id": "class:Endpoint",
+      "type": "class",
+      "name": "Endpoint",
+      "filePath": "src/openapi_mcp/parser.py",
+      "layer": "service",
+      "summary": "Dataclass representing a single API endpoint with operation_id, method, path, summary, description, params list, and tags.",
+      "language": "python",
+      "concepts": ["interfaces"]
+    },
+    {
+      "id": "class:EndpointParam",
+      "type": "class",
+      "name": "EndpointParam",
+      "filePath": "src/openapi_mcp/parser.py",
+      "layer": "service",
+      "summary": "Dataclass representing one parameter of an endpoint, with name, location (path/query/header/body), required flag, description, and type.",
+      "language": "python"
+    },
+    {
+      "id": "function:register_tools",
+      "type": "function",
+      "name": "register_tools",
+      "filePath": "src/openapi_mcp/server.py",
+      "layer": "api",
+      "summary": "Loads a spec and dynamically registers every endpoint as a FastMCP tool using closures to capture the operation ID for each handler.",
+      "language": "python",
+      "concepts": ["closures"]
+    },
+    {
+      "id": "function:load_spec",
+      "type": "function",
+      "name": "load_spec",
+      "filePath": "src/openapi_mcp/loader.py",
+      "layer": "data",
+      "summary": "Fetches or reads an OpenAPI spec and returns it as a parsed Python dict.",
+      "language": "python"
+    },
+    {
+      "id": "function:parse_spec",
+      "type": "function",
+      "name": "parse_spec",
+      "filePath": "src/openapi_mcp/parser.py",
+      "layer": "service",
+      "summary": "Converts an OpenAPI spec dict into (base_url, [Endpoint]) by iterating all paths and HTTP methods.",
+      "language": "python"
+    },
+    {
+      "id": "function:call_endpoint",
+      "type": "function",
+      "name": "call_endpoint",
+      "filePath": "src/openapi_mcp/executor.py",
+      "layer": "service",
+      "summary": "Async function that makes the actual HTTP call for an endpoint, resolving all parameter locations and attaching auth headers.",
+      "language": "python",
+      "concepts": ["async-await"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge:server-imports-loader",
+      "source": "file:src/openapi_mcp/server.py",
+      "target": "file:src/openapi_mcp/loader.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:server-imports-parser",
+      "source": "file:src/openapi_mcp/server.py",
+      "target": "file:src/openapi_mcp/parser.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:server-imports-executor",
+      "source": "file:src/openapi_mcp/server.py",
+      "target": "file:src/openapi_mcp/executor.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:register_tools-calls-load_spec",
+      "source": "function:register_tools",
+      "target": "function:load_spec",
+      "type": "calls"
+    },
+    {
+      "id": "edge:register_tools-calls-parse_spec",
+      "source": "function:register_tools",
+      "target": "function:parse_spec",
+      "type": "calls"
+    },
+    {
+      "id": "edge:register_tools-calls-call_endpoint",
+      "source": "function:register_tools",
+      "target": "function:call_endpoint",
+      "type": "calls"
+    },
+    {
+      "id": "edge:executor-uses-Endpoint",
+      "source": "file:src/openapi_mcp/executor.py",
+      "target": "class:Endpoint",
+      "type": "uses"
+    },
+    {
+      "id": "edge:parser-produces-Endpoint",
+      "source": "function:parse_spec",
+      "target": "class:Endpoint",
+      "type": "uses"
+    },
+    {
+      "id": "edge:test_executor-uses-executor",
+      "source": "file:tests/test_executor.py",
+      "target": "file:src/openapi_mcp/executor.py",
+      "type": "uses"
+    },
+    {
+      "id": "edge:test_parser-uses-parser",
+      "source": "file:tests/test_parser.py",
+      "target": "file:src/openapi_mcp/parser.py",
+      "type": "uses"
+    },
+    {
+      "id": "edge:test_loader-uses-loader",
+      "source": "file:tests/test_loader.py",
+      "target": "file:src/openapi_mcp/loader.py",
+      "type": "uses"
+    }
+  ],
+  "tours": [
+    {
+      "id": "tour:startup-tool-registration",
+      "title": "How OpenAPI Endpoints Become MCP Tools",
+      "steps": [
+        { "nodeId": "file:src/openapi_mcp/server.py", "reason": "Start here — main() reads the spec source env var and calls register_tools." },
+        { "nodeId": "function:load_spec", "reason": "The spec is fetched from URL or file; supports JSON and YAML." },
+        { "nodeId": "function:parse_spec", "reason": "The loaded dict is turned into a list of typed Endpoint objects." },
+        { "nodeId": "function:register_tools", "reason": "Each Endpoint gets a dynamically created FastMCP tool via closures." }
+      ]
+    },
+    {
+      "id": "tour:executing-an-api-call",
+      "title": "How a Tool Call Executes an API Request",
+      "steps": [
+        { "nodeId": "class:Endpoint", "reason": "Understand the data structure passed to the executor." },
+        { "nodeId": "class:EndpointParam", "reason": "Each parameter carries its location (path/query/header/body) to drive request construction." },
+        { "nodeId": "function:call_endpoint", "reason": "The executor resolves all parameters, adds auth headers, and makes the async HTTP call." }
+      ]
+    }
+  ]
+}
